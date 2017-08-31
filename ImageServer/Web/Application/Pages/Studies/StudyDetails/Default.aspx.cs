@@ -25,9 +25,13 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Permissions;
+using System.Web;
 using ClearCanvas.Common.Utilities;
+using ClearCanvas.Dicom.Audit;
+using ClearCanvas.ImageServer.Common;
 using ClearCanvas.ImageServer.Common.Authentication;
 using ClearCanvas.ImageServer.Common.Exceptions;
+using ClearCanvas.ImageServer.Common.Helpers;
 using ClearCanvas.ImageServer.Model;
 using ClearCanvas.ImageServer.Model.EntityBrokers;
 using ClearCanvas.ImageServer.Web.Application.Controls;
@@ -37,6 +41,7 @@ using ClearCanvas.ImageServer.Web.Common;
 using ClearCanvas.ImageServer.Web.Common.Data;
 using ClearCanvas.ImageServer.Web.Common.Data.DataSource;
 using ClearCanvas.ImageServer.Web.Common.Exceptions;
+using ClearCanvas.ImageServer.Web.Common.Security;
 using ClearCanvas.ImageServer.Web.Common.Utilities;
 using Resources;
 using StudyNotFoundException=ClearCanvas.ImageServer.Web.Common.Exceptions.StudyNotFoundException;
@@ -174,11 +179,11 @@ namespace ClearCanvas.ImageServer.Web.Application.Pages.Studies.StudyDetails
 			StudySelectCriteria criteria = new StudySelectCriteria();
 			criteria.StudyInstanceUid.EqualTo(_studyInstanceUid);
 			criteria.ServerPartitionKey.EqualTo(Partition.GetKey());
-			Study study = studyAdaptor.GetFirst(HttpContextData.Current.ReadContext, criteria);
+			Study study = studyAdaptor.GetFirst(HttpContext.Current.GetSharedPersistentContext(), criteria);
 
             if (study != null)
             {
-                _study = StudySummaryAssembler.CreateStudySummary(HttpContextData.Current.ReadContext, study);
+				_study = StudySummaryAssembler.CreateStudySummary(HttpContext.Current.GetSharedPersistentContext(), study);
             }
             else
             {
@@ -189,7 +194,22 @@ namespace ClearCanvas.ImageServer.Web.Application.Pages.Studies.StudyDetails
 			
         	StudyDetailsPanel.Study = _study;
             StudyDetailsPanel.DataBind();
+
+	        GenerateAuditLog();
         }
+
+	    private void GenerateAuditLog()
+	    {
+			var audit = new DicomInstancesAccessedAuditHelper(ServerPlatform.AuditSource, EventIdentificationContentsEventOutcomeIndicator.Success, EventIdentificationContentsEventActionCode.R /* Read*/);
+			audit.AddUser(new AuditPersonActiveParticipant(SessionManager.Current.Credentials.UserName,null,SessionManager.Current.Credentials.DisplayName));
+
+			var participant = new AuditStudyParticipantObject(_study.StudyInstanceUid, _study.AccessionNumber);
+		    participant.ParticipantObjectDetailString = string.Format("Partition: {0}", string.IsNullOrEmpty(_study.ThePartition.Description) ? _study.ThePartition.AeTitle : _study.ThePartition.Description);
+			audit.AddStudyParticipantObject(participant);
+
+			ServerAuditHelper.LogAuditMessage(audit);
+
+	    }
 
         protected override void OnPreRender(EventArgs e)
         {

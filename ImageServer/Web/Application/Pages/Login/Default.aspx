@@ -37,6 +37,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" >
 <head runat="server">
 	<meta http-equiv="X-UA-Compatible"  Content = "IE=10"></meta>
+	<link rel="shortcut icon" type="image/ico" runat="server" href="~/Images/favicon.ico" />
 </head>
 <body id="PageBody" class="LoginBody" runat="server">
 	
@@ -83,17 +84,13 @@
 				<table>
             <tr>
             <td align="right"><asp:Label ID="Label2" runat="server" Text="<%$Resources: Labels,UserID %>"></asp:Label></td>
-            <td align="right"><asp:TextBox runat="server" ID="UserName" CssClass="LoginTextInput"></asp:TextBox></td>
+            <td align="right"><asp:TextBox runat="server" ID="UserName" CssClass="LoginTextInput"  AutoCompleteType="Disabled" TabIndex="1"></asp:TextBox></td>
+                <td align="left"><asp:Button runat="server" ID="LoginButton" OnClick="LoginClicked"  Text="<%$Resources: Labels,ButtonLogin %>" CssClass="LoginButton" TabIndex="3"/></td>
             </tr>
             <tr>
             <td align="right"><asp:Label ID="Label3" runat="server" Text="<%$Resources: Labels,Password %>"></asp:Label></td>
-            <td align="right"><asp:TextBox runat="server" ID="Password" TextMode="Password" CssClass="LoginTextInput"></asp:TextBox></td>
-            </tr> 
-            <tr>
-                <td colspan="2" align="right"><asp:Button runat="server" ID="LoginButton" OnClick="LoginClicked"  Text="<%$Resources: Labels,ButtonLogin %>" CssClass="LoginButton"/></td>
-            </tr>               
-            <tr>
-                <td colspan="2" align="right" ><asp:LinkButton ID="LinkButton1" runat="server" CssClass="LoginLink" OnClick="ChangePassword"><asp:Label ID="Label4" runat="server" Text="<%$Resources: Labels,ChangePassword%>"></asp:Label></asp:LinkButton></td>            
+            <td align="right"><asp:TextBox runat="server" ID="Password" TextMode="Password" CssClass="LoginTextInput"  AutoCompleteType="Disabled" TabIndex="2"></asp:TextBox></td>
+                <td align="left"><asp:Button runat="server" ID="LinkButton1" OnClick="ChangePassword"  Text="<%$Resources: Labels,ChangePassword %>" CssClass="LoginButton" TabIndex="4"/></td>
             </tr>
         </table>
 			</div>
